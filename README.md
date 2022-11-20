@@ -5,4 +5,4 @@ A Plymouth theme made from meme
 
 ## Manual installation
 
-Clone the repo to `/usr/share/plymouth/themes` and run `# plymouth-set-default-theme -R arch-beat`
+Clone the repo to `/usr/share/plymouth/themes` and run `# plymouth-set-default-theme -R plymouth-gangster-edition`
