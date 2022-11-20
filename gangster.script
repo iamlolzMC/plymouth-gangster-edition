@@ -1,0 +1,141 @@
+width = Window.GetWidth();
+height = Window.GetHeight();
+
+for (i = 1; i < 26; i++)
+  {
+    image = Image("fadein-" + i + ".png");
+    if(width != 1920 && height != 1080) 
+      image.Scale(Window.GetWidth(), Window.GetHeight());
+    fadein_image[i] = image;
+  }
+
+for (i = 1; i < 52; i++)
+  {
+    image = Image("anim-" + i + ".png");
+    if(wigth != 1920 && height != 1080)
+      image.Scale(Window.GetWidth(), Window.GetHeight());
+    anim_image[i] = image;
+  }
+
+sprite = Sprite();
+
+progress = 0;
+anim_frame = 1;
+fadein_frame = 1;
+global.status = "normal";
+
+fun refresh_callback ()
+  {
+    if(global.status == "password")
+    {
+      sprite.SetImage(Image("anim-input.png"));
+      return;
+    }
+
+    progress++;
+
+    if(progress <= 1) {
+      return;
+    }
+    
+    progress = 0;
+    
+    if(fadein_frame <= 26) {
+      sprite.SetImage(fadein_image[fadein_frame]);
+      fadein_frame++;
+      return;
+    }
+    
+    if(anim_frame > 52) {
+      anim_frame = 1;
+    }
+
+    sprite.SetImage(anim_image[anim_frame]);
+    anim_frame++;
+  }
+
+Plymouth.SetRefreshFunction(refresh_callback);
+
+message_sprite = Sprite();
+message_sprite.SetPosition(width - (width * 0.533), height - (height * 0.23), 100000);
+
+fun message_callback (text)
+{
+  my_image = Image.Text(text, 10, 10, 10);
+  message_sprite.SetImage(my_image);
+}
+
+Plymouth.SetMessageFunction(message_callback);
+
+fun dialog_setup()
+  {
+    local.box;
+    local.lock;
+    local.prompt_sprite;
+    
+    box.image = Image("box.png");
+    lock.image = Image("lock.png");
+    
+    box.sprite = Sprite();
+    box.sprite.SetImage(box.image);
+    box.x = width - width * 0.575;
+    box.y = height - height * 0.27;
+    box.z = 10000;
+    box.sprite.SetPosition(box.x, box.y, box.z);
+    
+    lock.sprite = Sprite();
+    lock.sprite.SetImage(lock.image);
+    lock.x = box.x + box.x * 0.14;
+    lock.y = box.y - box.y * 0.1;
+    lock.z = box.z + 1;
+    lock.sprite.SetPosition(lock.x, lock.y, lock.z);
+    
+    global.dialog.box = box;
+    global.dialog.lock = lock;
+    global.dialog.bullet_image = Image("bullet.png");
+    dialog_opacity (1);
+  }
+
+fun dialog_opacity(opacity)
+  {
+    dialog.box.sprite.SetOpacity (opacity);
+    dialog.lock.sprite.SetOpacity (opacity);
+    for (index = 0; dialog.bullet[index]; index++)
+      {
+        dialog.bullet[index].sprite.SetOpacity(opacity);
+      }
+  }
+
+fun display_normal_callback ()
+  {
+    global.status = "normal";
+    if (global.dialog)
+      dialog_opacity (0);
+  }
+
+fun display_password_callback (prompt, bullets)
+  {
+    global.status = "password";
+    if (!global.dialog)
+	dialog_setup();
+    else
+	dialog_opacity(1);
+    for (index = 0; dialog.bullet[index] || index < bullets; index++)
+      {
+        if (!dialog.bullet[index])
+          {
+            dialog.bullet[index].sprite = Sprite(dialog.bullet_image);
+            dialog.bullet[index].x = dialog.box.x + index * 30;
+            dialog.bullet[index].y = dialog.box.y + dialog.box.image.GetHeight() * 0.09;
+            dialog.bullet[index].z = dialog.box.z + 1;
+            dialog.bullet[index].sprite.SetPosition(dialog.bullet[index].x, dialog.bullet[index].y, dialog.bullet[index].z);
+          }
+        if (index < bullets)
+          dialog.bullet[index].sprite.SetOpacity(1);
+        else
+          dialog.bullet[index].sprite.SetOpacity(0);
+      }
+  }
+
+Plymouth.SetDisplayNormalFunction(display_normal_callback);
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
